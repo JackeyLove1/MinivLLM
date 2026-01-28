@@ -1,14 +1,15 @@
 import torch
 from torch import nn
 import os
-
+from safetensors.torch import safe_open
 
 def default_weight_loader(module, weight):
     module.data.copy_(weight)
 
 
 def load_weights_from_checkpoint(model: nn.Module, checkpoint_path: str):
-    for file in os.path.listdir(checkpoint_path):
+    packed_module_mapping = getattr(model, "packed_modules_mapping", {})
+    for file in os.listdir(checkpoint_path):
         if file.endswith('.safetensors'):
             file_dir = os.path.join(checkpoint_path, file)
             with safe_open(file_dir, 'pt', device='cpu') as f:
